@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>World Wide Contacts VCF - Let's Tech Forward</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Animated background -->
+  <div id="background"></div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title"><i class="fas fa-globe-americas"></i> World Wide Contacts VCF</h1>
+      <p class="subtitle">Let's Tech Forward 👈 • Expand Your Network Globally</p>
+    </header>
+
+    <!-- Countdown Timer -->
+    <div class="timer-box">
+      <h3><i class="fas fa-clock"></i> Time Remaining</h3>
+      <div id="countdownTimer" class="countdown">Loading...</div>
+    </div>
+
+    <!-- Benefits Section -->
+    <section class="benefits-section">
+      <h3><i class="fas fa-star"></i> Why Join Our VCF Network?</h3>
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <i class="fas fa-users"></i>
+          <h4>Global Network</h4>
+          <p>Connect with hundreds of worldwide contacts instantly</p>
+        </div>
+        <div class="benefit-card">
+          <i class="fas fa-chart-line"></i>
+          <h4>Business Growth</h4>
+          <p>More contacts = More status viewers & business opportunities</p>
+        </div>
+        <div class="benefit-card">
+          <i class="fas fa-bolt"></i>
+          <h4>Instant Import</h4>
+          <p>One-click VCF file works on all smartphones</p>
+        </div>
+        <div class="benefit-card">
+          <i class="fas fa-shield-alt"></i>
+          <h4>Verified Contacts</h4>
+          <p>All contacts are verified and active users</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Progress Stats -->
+    <div class="stats-container">
+      <h3 class="progress-title">
+        <i class="fas fa-tachometer-alt"></i> Progress to Unlock VCF: 
+        <span id="percent">0%</span>
+      </h3>
+      
+      <div class="progress-bar">
+        <div id="progressFill"></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat" id="stat-current" style="--color:#1e90ff; --pct:0;">
+          <span id="current">0</span>
+          <p>Saved Contacts</p>
+        </div>
+        <div class="stat" id="stat-target" style="--color:#ff4d4d; --pct:0;">
+          <span id="target">800</span>
+          <p>Target Goal</p>
+        </div>
+        <div class="stat" id="stat-remaining" style="--color:#ffd300; --pct:360;">
+          <span id="remaining">800</span>
+          <p>Remaining</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VCF Download Status -->
+    <div id="vcfStatus" class="vcf-status hidden">
+      <div class="status-ready">
+        <i class="fas fa-check-circle"></i>
+        <h3>VCF Ready to Download!</h3>
+        <p>We've reached 500+ contacts! Download the global contacts file now.</p>
+        <button id="downloadVCF" class="download-btn">
+          <i class="fas fa-download"></i> Download VCF File
+        </button>
+      </div>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="form-card" id="formCard">
+      <h3><i class="fas fa-user-plus"></i> Join the Network</h3>
+      <label>Your Name</label>
+      <input id="name" type="text" placeholder="Enter your full name">
+
+      <label>Phone Number</label>
+      <input id="phone" type="text" placeholder="+254700000000">
+
+      <button id="submitBtn">
+        <i class="fas fa-paper-plane"></i> Submit & Join WhatsApp Channel
+      </button>
+      <p id="success" class="success hidden">Contact submitted successfully!</p>
+    </div>
+
+    <!-- Channel & Info Box -->
+    <div class="channel-box">
+      <div class="info-section">
+        <h4><i class="fas fa-info-circle"></i> Important Information</h4>
+        <p>• VCF file will be automatically available when we reach <b>500 contacts</b></p>
+        <p>• Final file with all 800 contacts will be shared in our WhatsApp channel</p>
+        <p>• Join our channel for updates and community networking</p>
+      </div>
+
+      <a href="https://whatsapp.com/channel/0029Vb7EiER6LwHh7es3vR3c" 
+         class="whatsapp-btn" target="_blank">
+        <i class="fab fa-whatsapp"></i> Join Our WhatsApp Channel
+      </a>
+
+      <a href="admin.html" class="admin-link">
+        <i class="fas fa-cog"></i> Admin Panel
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Created by <strong>Tracker Wanga</strong></p>
+      <a href="https://wa.me/254769502217" class="whatsapp-contact" target="_blank">
+        <i class="fab fa-whatsapp"></i> WhatsApp: +254 769 502217
+      </a>
+    </footer>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
