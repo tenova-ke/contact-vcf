@@ -1,8 +1,8 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, where, doc, setDoc, getDoc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// Firebase config - Updated with your credentials
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDpkz3T_KgRqTkRmu7dKgMWyIL4YtRPAs0",
   authDomain: "wanga-vcf.firebaseapp.com",
@@ -32,23 +32,82 @@ const formCard = document.getElementById("formCard");
 const downloadBtn = document.getElementById("downloadVCF");
 const vcfStatus = document.getElementById("vcfStatus");
 const countdownTimer = document.getElementById("countdownTimer");
+const releaseDate = document.getElementById("releaseDateText");
+const typingMessage = document.getElementById("typingMessage");
+const typingText = document.getElementById("typingText");
+const viewBenefitsBtn = document.getElementById("viewBenefitsBtn");
+const benefitsSection = document.getElementById("benefitsSection");
+const closeBenefits = document.getElementById("closeBenefits");
+const whatsappAppBtn = document.getElementById("whatsappAppBtn");
+const whatsappContactBtn = document.getElementById("whatsappContactBtn");
 
 const statCurrent = document.getElementById("stat-current");
 const statTarget = document.getElementById("stat-target");
 const statRemaining = document.getElementById("stat-remaining");
 
+// WhatsApp links
+const whatsappChannelLink = "whatsapp://channel?address=0029Vb7EiER6LwHh7es3vR3c";
 const whatsappWebLink = "https://whatsapp.com/channel/0029Vb7EiER6LwHh7es3vR3c";
+const whatsappContactLink = "https://wa.me/254769502217";
 
-// Countdown Timer
-const countdownDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).getTime(); // 30 days from now
+// Release date - 2nd December 2025
+const RELEASE_DATE = new Date("December 2, 2025 00:00:00").getTime();
 
+// Website launch time (stored in localStorage)
+const LAUNCH_KEY = "wanga_vcf_launch_time";
+
+// Get or set launch time
+function getLaunchTime() {
+  const stored = localStorage.getItem(LAUNCH_KEY);
+  if (stored) {
+    return parseInt(stored);
+  } else {
+    const now = Date.now();
+    localStorage.setItem(LAUNCH_KEY, now.toString());
+    return now;
+  }
+}
+
+const LAUNCH_TIME = getLaunchTime();
+const COUNTDOWN_DAYS = 45; // Countdown from launch for 45 days
+
+// Typing effect
+function typeText(text, element, speed = 50, callback = null) {
+  element.textContent = "";
+  let i = 0;
+  
+  function typeCharacter() {
+    if (i < text.length) {
+      element.textContent += text.charAt(i);
+      i++;
+      setTimeout(typeCharacter, speed);
+    } else if (callback) {
+      setTimeout(callback, 1000);
+    }
+  }
+  
+  typeCharacter();
+}
+
+// Show typing message
+function showTypingMessage(message) {
+  typingMessage.classList.remove("hidden");
+  typeText(message, typingText, 30, () => {
+    setTimeout(() => {
+      typingMessage.classList.add("hidden");
+      typingText.textContent = "";
+    }, 3000);
+  });
+}
+
+// Countdown Timer (from launch)
 function updateCountdown() {
   const now = new Date().getTime();
-  const distance = countdownDate - now;
+  const endTime = LAUNCH_TIME + (COUNTDOWN_DAYS * 24 * 60 * 60 * 1000);
+  const distance = endTime - now;
 
   if (distance < 0) {
-    countdownTimer.innerHTML = "Submission Period Ended!";
-    formCard.style.display = "none";
+    countdownTimer.innerHTML = "Countdown Ended!";
     return;
   }
 
@@ -59,6 +118,9 @@ function updateCountdown() {
 
   countdownTimer.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
+
+// Set release date display
+releaseDate.textContent = "2nd December 2025";
 
 // Check VCF download status
 async function checkVCFStatus(totalContacts) {
@@ -71,7 +133,8 @@ async function checkVCFStatus(totalContacts) {
       await updateDoc(doc(db, "settings", "vcfControl"), {
         enabled: true,
         threshold: vcfData.threshold,
-        manuallyDisabled: false
+        manuallyDisabled: false,
+        lastUpdated: new Date().toISOString()
       });
     }
 
@@ -133,13 +196,16 @@ submitBtn.addEventListener("click", async () => {
   const phone = phoneInput.value.trim();
   
   if (!name || !phone) {
-    alert("Please fill in both fields");
+    showTypingMessage("Please fill in both fields before submitting.");
     return;
   }
 
-  // Simple phone validation
-  if (!phone.match(/^\+?[\d\s-()]{10,}$/)) {
-    alert("Please enter a valid phone number");
+  // Enhanced phone validation
+  const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+  const cleanedPhone = phone.replace(/[\s\-\(\)]/g, '');
+  
+  if (!phoneRegex.test(cleanedPhone)) {
+    showTypingMessage("Please enter a valid phone number (e.g., +254700000000)");
     return;
   }
 
@@ -148,79 +214,96 @@ submitBtn.addEventListener("click", async () => {
 
   try {
     // Check for duplicate phone
-    const q = query(collection(db, "contacts"), where("phone", "==", phone));
+    const q = query(collection(db, "contacts"), where("phone", "==", cleanedPhone));
     const snapshot = await getDocs(q);
     
     if (!snapshot.empty) {
-      successMsg.textContent = "⚠️ This number is already registered!";
-      successMsg.style.color = "red";
-      successMsg.classList.remove("hidden");
-      setTimeout(() => successMsg.classList.add("hidden"), 3000);
+      showTypingMessage("This phone number is already registered in our database.");
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit & Join WhatsApp Channel';
       return;
     }
 
     // Add new contact
     await addDoc(collection(db, "contacts"), { 
       name: name, 
-      phone: phone, 
-      timestamp: new Date().toISOString()
+      phone: cleanedPhone, 
+      timestamp: new Date().toISOString(),
+      dateAdded: new Date().toLocaleDateString()
     });
 
-    successMsg.textContent = "✅ Contact submitted successfully!";
-    successMsg.style.color = "#ffd700";
-    successMsg.classList.remove("hidden");
+    // Show personalized success message with typing effect
+    const successMessage = `${name} saved successfully! Thank you for joining our global network.`;
+    showTypingMessage(successMessage);
 
     // Clear form
     nameInput.value = "";
     phoneInput.value = "";
 
-    // Redirect to WhatsApp after delay
+    // Open WhatsApp in app after delay
     setTimeout(() => {
-      successMsg.classList.add("hidden");
-      window.open(whatsappWebLink, "_blank");
+      // Try to open in WhatsApp app first
+      window.location.href = whatsappChannelLink;
+      
+      // Fallback to web if app doesn't open
+      setTimeout(() => {
+        window.open(whatsappWebLink, "_blank");
+      }, 500);
     }, 2000);
 
     updateStats();
     
   } catch (error) {
     console.error("Error adding contact:", error);
-    alert("Failed to submit contact. Please try again.");
+    showTypingMessage("Failed to submit contact. Please check your connection and try again.");
   } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit & Join WhatsApp Channel';
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit & Join WhatsApp Channel';
+    }, 2000);
   }
 });
 
-// Generate VCF
+// Generate VCF with numbering
 async function generateVCF() {
   try {
+    downloadBtn.disabled = true;
+    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+
     const snapshot = await getDocs(collection(db, "contacts"));
     const docs = [];
     snapshot.forEach(d => docs.push(d.data()));
 
     if (docs.length === 0) {
-      alert("No contacts available to generate VCF");
+      showTypingMessage("No contacts available to generate VCF.");
       return;
     }
 
+    showTypingMessage(`Generating VCF file with ${docs.length} contacts...`);
+
     let vcf = "";
-    docs.forEach(data => {
-      const fn = (data.name || "").toString().replace(/\r?\n/g, " ");
+    docs.forEach((data, index) => {
+      const number = String(index + 1).padStart(2, '0'); // 01, 02, 03, etc.
+      const fn = `[${number}] ${(data.name || "").toString().replace(/\r?\n/g, " ")}`;
       const tel = (data.phone || "").toString().replace(/\r?\n/g, " ");
+      
       vcf += `BEGIN:VCARD
 VERSION:3.0
 FN:${fn}
-TEL:${tel}
+TEL;TYPE=CELL:${tel}
 END:VCARD
 `;
     });
 
-    const blob = new Blob([vcf], { type: "text/vcard" });
+    // Create and download the file
+    const blob = new Blob([vcf], { type: "text/vcard;charset=utf-8" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = `WorldWide_Contacts_${docs.length}.vcf`;
+    a.download = `Global_Contacts_${docs.length}_${new Date().toISOString().split('T')[0]}.vcf`;
+    
+    // Append to body, click, and remove
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -228,16 +311,55 @@ END:VCARD
     // Log download
     await addDoc(collection(db, "downloads"), {
       timestamp: new Date().toISOString(),
-      contactCount: docs.length
+      contactCount: docs.length,
+      source: "user",
+      fileName: a.download
     });
 
-    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    showTypingMessage(`VCF file downloaded! ${docs.length} contacts added to your phonebook.`);
+
+    // Clean up URL after download
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      downloadBtn.disabled = false;
+      downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download VCF File';
+    }, 1000);
+    
   } catch (err) {
     console.error("Error generating VCF:", err);
-    alert("Failed to generate VCF file");
+    showTypingMessage("Failed to generate VCF file. Please try again.");
+    downloadBtn.disabled = false;
+    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download VCF File';
   }
 }
 
+// Toggle benefits section
+viewBenefitsBtn.addEventListener("click", () => {
+  benefitsSection.classList.remove("hidden");
+  viewBenefitsBtn.style.display = "none";
+});
+
+closeBenefits.addEventListener("click", () => {
+  benefitsSection.classList.add("hidden");
+  viewBenefitsBtn.style.display = "block";
+});
+
+// WhatsApp buttons
+whatsappAppBtn.addEventListener("click", () => {
+  // Try to open in WhatsApp app first
+  window.location.href = whatsappChannelLink;
+  
+  // Fallback to web if app doesn't open
+  setTimeout(() => {
+    window.open(whatsappWebLink, "_blank");
+  }, 500);
+});
+
+whatsappContactBtn.addEventListener("click", () => {
+  window.open(whatsappContactLink, "_blank");
+});
+
+// Download button event
 downloadBtn.addEventListener("click", generateVCF);
 
 // Initialize
@@ -254,7 +376,8 @@ async function initializeSettings() {
       await setDoc(doc(db, "settings", "vcfControl"), {
         enabled: false,
         threshold: VCF_THRESHOLD,
-        manuallyDisabled: false
+        manuallyDisabled: false,
+        created: new Date().toISOString()
       });
     }
   } catch (error) {
