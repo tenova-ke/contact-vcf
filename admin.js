@@ -1,6 +1,6 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, setDoc, getDoc, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -17,7 +17,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Admin Password
+const ADMIN_PASSWORD = "Wanga@2006";
+
 // DOM Elements
+const passwordModal = document.getElementById("passwordModal");
+const adminContent = document.getElementById("adminContent");
+const adminPassword = document.getElementById("adminPassword");
+const submitPassword = document.getElementById("submitPassword");
+const passwordError = document.getElementById("passwordError");
+const logoutBtn = document.getElementById("logoutBtn");
+
 const adminTotalContacts = document.getElementById("adminTotalContacts");
 const adminVcfStatus = document.getElementById("adminVcfStatus");
 const adminDownloadCount = document.getElementById("adminDownloadCount");
@@ -28,6 +38,58 @@ const thresholdInput = document.getElementById("thresholdInput");
 const updateThreshold = document.getElementById("updateThreshold");
 const contactsContainer = document.getElementById("contactsContainer");
 const downloadLogs = document.getElementById("downloadLogs");
+const downloadMessage = document.getElementById("downloadMessage");
+
+// Check if already authenticated
+function checkAuth() {
+  const isAuthenticated = localStorage.getItem('adminAuthenticated') === 'true';
+  if (isAuthenticated) {
+    showAdminPanel();
+  } else {
+    showPasswordModal();
+  }
+}
+
+// Show password modal
+function showPasswordModal() {
+  passwordModal.classList.remove('hidden');
+  adminContent.classList.add('hidden');
+  adminPassword.value = '';
+  adminPassword.focus();
+}
+
+// Show admin panel
+function showAdminPanel() {
+  passwordModal.classList.add('hidden');
+  adminContent.classList.remove('hidden');
+  loadAdminData();
+}
+
+// Password submission
+submitPassword.addEventListener('click', () => {
+  const password = adminPassword.value.trim();
+  if (password === ADMIN_PASSWORD) {
+    localStorage.setItem('adminAuthenticated', 'true');
+    showAdminPanel();
+  } else {
+    passwordError.classList.remove('hidden');
+    adminPassword.value = '';
+    adminPassword.focus();
+  }
+});
+
+// Enter key for password
+adminPassword.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') {
+    submitPassword.click();
+  }
+});
+
+// Logout functionality
+logoutBtn.addEventListener('click', () => {
+  localStorage.removeItem('adminAuthenticated');
+  showPasswordModal();
+});
 
 // Load admin data
 async function loadAdminData() {
@@ -90,12 +152,15 @@ async function loadRecentContacts() {
     // Sort by timestamp (newest first)
     contacts.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     
-    // Display last 10 contacts
-    const recentContacts = contacts.slice(0, 10);
+    // Display last 20 contacts
+    const recentContacts = contacts.slice(0, 20);
     
-    contactsContainer.innerHTML = recentContacts.map(contact => `
+    contactsContainer.innerHTML = recentContacts.map((contact, index) => `
       <div class="contact-item">
-        <div class="contact-name">${contact.name}</div>
+        <div class="contact-header">
+          <span class="contact-number">#${index + 1}</span>
+          <span class="contact-name">${contact.name}</span>
+        </div>
         <div class="contact-phone">${contact.phone}</div>
         <div class="contact-time">${new Date(contact.timestamp).toLocaleString()}</div>
       </div>
@@ -121,7 +186,10 @@ async function loadDownloadLogs() {
     
     downloadLogs.innerHTML = logs.map(log => `
       <div class="log-item">
-        ${new Date(log.timestamp).toLocaleString()} - ${log.contactCount} contacts downloaded
+        <i class="fas fa-download"></i>
+        ${new Date(log.timestamp).toLocaleString()} - 
+        ${log.contactCount} contacts downloaded
+        ${log.source ? `(${log.source})` : ''}
       </div>
     `).join('');
     
@@ -136,13 +204,14 @@ enableVCF.addEventListener("click", async () => {
   try {
     await updateDoc(doc(db, "settings", "vcfControl"), {
       enabled: true,
-      manuallyDisabled: false
+      manuallyDisabled: false,
+      lastUpdated: new Date().toISOString()
     });
     await updateVCFStatus();
-    alert("VCF download enabled successfully!");
+    showMessage("VCF download enabled successfully!", "success");
   } catch (error) {
     console.error("Error enabling VCF:", error);
-    alert("Failed to enable VCF download");
+    showMessage("Failed to enable VCF download", "error");
   }
 });
 
@@ -151,13 +220,14 @@ disableVCF.addEventListener("click", async () => {
   try {
     await updateDoc(doc(db, "settings", "vcfControl"), {
       enabled: false,
-      manuallyDisabled: true
+      manuallyDisabled: true,
+      lastUpdated: new Date().toISOString()
     });
     await updateVCFStatus();
-    alert("VCF download disabled successfully!");
+    showMessage("VCF download disabled successfully!", "success");
   } catch (error) {
     console.error("Error disabling VCF:", error);
-    alert("Failed to disable VCF download");
+    showMessage("Failed to disable VCF download", "error");
   }
 });
 
@@ -165,51 +235,73 @@ disableVCF.addEventListener("click", async () => {
 updateThreshold.addEventListener("click", async () => {
   const threshold = parseInt(thresholdInput.value);
   if (isNaN(threshold) || threshold < 1) {
-    alert("Please enter a valid threshold number");
+    showMessage("Please enter a valid threshold number", "error");
     return;
   }
   
   try {
     await updateDoc(doc(db, "settings", "vcfControl"), {
-      threshold: threshold
+      threshold: threshold,
+      lastUpdated: new Date().toISOString()
     });
-    alert(`Threshold updated to ${threshold} contacts!`);
+    showMessage(`Threshold updated to ${threshold} contacts!`, "success");
   } catch (error) {
     console.error("Error updating threshold:", error);
-    alert("Failed to update threshold");
+    showMessage("Failed to update threshold", "error");
   }
 });
 
-// Generate VCF from admin panel
+// Show message function
+function showMessage(message, type) {
+  downloadMessage.textContent = message;
+  downloadMessage.className = type;
+  downloadMessage.classList.remove("hidden");
+  
+  setTimeout(() => {
+    downloadMessage.classList.add("hidden");
+  }, 3000);
+}
+
+// Improved VCF Generation with numbering
 generateVCF.addEventListener("click", async () => {
   try {
+    generateVCF.disabled = true;
+    generateVCF.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating VCF...';
+    
     const snapshot = await getDocs(collection(db, "contacts"));
     const docs = [];
     snapshot.forEach(d => docs.push(d.data()));
 
     if (docs.length === 0) {
-      alert("No contacts available to generate VCF");
+      showMessage("No contacts available to generate VCF", "error");
       return;
     }
 
+    showMessage(`Generating VCF with ${docs.length} contacts...`, "success");
+
     let vcf = "";
-    docs.forEach(data => {
-      const fn = (data.name || "").toString().replace(/\r?\n/g, " ");
+    docs.forEach((data, index) => {
+      const number = String(index + 1).padStart(2, '0'); // 01, 02, 03, etc.
+      const fn = `[${number}] ${(data.name || "").toString().replace(/\r?\n/g, " ")}`;
       const tel = (data.phone || "").toString().replace(/\r?\n/g, " ");
+      
       vcf += `BEGIN:VCARD
 VERSION:3.0
 FN:${fn}
-TEL:${tel}
+TEL;TYPE=CELL:${tel}
 END:VCARD
 `;
     });
 
-    const blob = new Blob([vcf], { type: "text/vcard" });
+    // Create and download the file
+    const blob = new Blob([vcf], { type: "text/vcard;charset=utf-8" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = `WorldWide_Contacts_Admin_${docs.length}.vcf`;
+    a.download = `WorldWide_Contacts_${docs.length}_${new Date().toISOString().split('T')[0]}.vcf`;
+    
+    // Append to body, click, and remove
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -218,18 +310,28 @@ END:VCARD
     await addDoc(collection(db, "downloads"), {
       timestamp: new Date().toISOString(),
       contactCount: docs.length,
-      source: "admin"
+      source: "admin",
+      fileName: a.download
     });
 
-    setTimeout(() => URL.revokeObjectURL(url), 30000);
-    
+    showMessage(`VCF file downloaded successfully with ${docs.length} contacts!`, "success");
+
+    // Clean up URL after download
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      generateVCF.disabled = false;
+      generateVCF.innerHTML = '<i class="fas fa-file-export"></i> Generate & Download VCF';
+    }, 1000);
+
     // Refresh counts
     await updateDownloadCount();
     await loadDownloadLogs();
     
   } catch (err) {
     console.error("Error generating VCF:", err);
-    alert("Failed to generate VCF file");
+    showMessage("Failed to generate VCF file: " + err.message, "error");
+    generateVCF.disabled = false;
+    generateVCF.innerHTML = '<i class="fas fa-file-export"></i> Generate & Download VCF';
   }
 });
 
@@ -248,5 +350,5 @@ onSnapshot(doc(db, "settings", "vcfControl"), () => {
   updateVCFStatus();
 });
 
-// Initialize admin panel
-loadAdminData();
+// Initialize admin panel with auth check
+checkAuth();
