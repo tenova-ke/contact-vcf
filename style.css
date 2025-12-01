@@ -699,3 +699,127 @@ button, .whatsapp-btn, .support-btn, .admin-link {
   color: rgba(255, 255, 255, 0.6);
   margin-top: 5px;
   }
+
+/* Typing Message */
+.typing-message {
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  text-align: center;
+}
+
+.typing-container {
+  font-size: 1rem;
+  color: #ffd700;
+  min-height: 24px;
+}
+
+.typing-cursor {
+  animation: blink 1s infinite;
+  color: #ffd700;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* View Benefits Button */
+.view-benefits-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  width: 100%;
+  margin: 15px 0;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.view-benefits-btn:hover {
+  background: rgba(255, 215, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Benefits Header */
+.benefits-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Timer Box */
+.timer-box {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  text-align: center;
+}
+
+.release-date {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+#releaseDateText {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+/* WhatsApp App Button */
+#whatsappAppBtn, #whatsappContactBtn {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+#whatsappContactBtn {
+  background: transparent;
+  color: #25D366;
+  text-decoration: none;
+  margin-top: 8px;
+  display: inline-block;
+  padding: 0;
+}
+
+#whatsappContactBtn:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .typing-container {
+    font-size: 0.9rem;
+  }
+  
+  .release-date {
+    font-size: 0.8rem;
+  }
+  }
