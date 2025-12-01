@@ -580,3 +580,122 @@ button, .whatsapp-btn, .support-btn, .admin-link {
     gap: 10px;
   }
 }
+
+/* Password Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.modal-content h3 {
+  color: #ffd700;
+  margin-bottom: 15px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 12px;
+  margin: 15px 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 1rem;
+}
+
+.modal-content input:focus {
+  border-color: #ffd700;
+  outline: none;
+}
+
+.error {
+  color: #ff6b6b;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+/* Logout Button */
+.logout-btn {
+  background: rgba(220, 53, 69, 0.8) !important;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 10px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.logout-btn:hover {
+  background: rgba(220, 53, 69, 1) !important;
+  transform: translateY(-2px);
+}
+
+/* Contact Header */
+.contact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.contact-number {
+  background: #ffd700;
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+/* Download Status Messages */
+.download-status .success {
+  color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+  padding: 10px;
+  border-radius: 5px;
+  border-left: 3px solid #28a745;
+}
+
+.download-status .error {
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.1);
+  padding: 10px;
+  border-radius: 5px;
+  border-left: 3px solid #dc3545;
+}
+
+/* Contact items */
+.contact-item {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  border-left: 4px solid #ffd700;
+}
+
+.contact-time {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 5px;
+  }
