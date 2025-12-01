@@ -10,11 +10,27 @@
 <body>
   <div id="background"></div>
 
-  <div class="container admin-container">
+  <!-- Password Protection Modal -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content">
+      <h3><i class="fas fa-lock"></i> Admin Access Required</h3>
+      <p>Enter password to access the admin panel:</p>
+      <input type="password" id="adminPassword" placeholder="Enter password" />
+      <button id="submitPassword" class="btn-primary">
+        <i class="fas fa-unlock"></i> Access Admin Panel
+      </button>
+      <p id="passwordError" class="error hidden">Incorrect password. Try again.</p>
+    </div>
+  </div>
+
+  <div id="adminContent" class="container admin-container hidden">
     <header class="header">
       <h1 class="title"><i class="fas fa-cogs"></i> VCF Admin Control Panel</h1>
       <p class="subtitle">Manage Contacts & Downloads</p>
       <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Main Site</a>
+      <button id="logoutBtn" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
     </header>
 
     <!-- Admin Stats -->
@@ -45,7 +61,7 @@
           <i class="fas fa-times"></i> Disable VCF Download
         </button>
         <button id="generateVCF" class="btn-primary">
-          <i class="fas fa-file-export"></i> Generate VCF File
+          <i class="fas fa-file-export"></i> Generate & Download VCF
         </button>
       </div>
 
@@ -56,11 +72,15 @@
           Update Threshold
         </button>
       </div>
+
+      <div class="download-status">
+        <p id="downloadMessage" class="hidden"></p>
+      </div>
     </div>
 
     <!-- Contacts List -->
     <div class="contacts-list">
-      <h3><i class="fas fa-list"></i> Recent Contacts</h3>
+      <h3><i class="fas fa-list"></i> Recent Contacts (Last 20)</h3>
       <div id="contactsContainer" class="contacts-container">
         <!-- Contacts will be loaded here -->
       </div>
@@ -77,4 +97,4 @@
 
   <script type="module" src="admin.js"></script>
 </body>
-</html>
+  </html>
